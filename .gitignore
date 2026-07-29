@@ -1,11 +1,8 @@
-# node
-frontend/node_modules/
-npm-debug.log*
-
-# python
 __pycache__/
 *.pyc
-.venv/
-
-# docker
-.docker/
+.env
+backend/uploads/
+postgres_data/
+node_modules/
+frontend/dist/
+.DS_Store

@@ -1,11 +1,32 @@
-# Learner_Application
+# Heidelberg Academy High - Admissions Portal
 
-Full-stack learning app built with FastAPI + React + Docker
+A full-stack school admissions application for Heidelberg Academy High.
+Allows parents within a 10km radius to apply for learners Grade 1-12, upload documents, and track class availability in real-time.
 
 ## Tech Stack
-- **Backend**: FastAPI, Uvicorn, Python 3.11
+- **Backend**: FastAPI, Uvicorn, SQLAlchemy, PostgreSQL 15, Python 3.11
 - **Frontend**: React 18, Vite 5
 - **Containerization**: Docker + Docker Compose
+- **Planned**: Leaflet Maps, JWT Auth, File Upload
+
+## Project Goal
+1. Online applications for Grade 1-12
+2. 3 Classes per grade: A, B, C. 15 learners per class
+3. Real-time availability: "FULL" indicator when class is at capacity
+4. Document uploads: Birth Cert, Report, Parent ID, Proof of Address, etc.
+5. 10km Radius check from Heidelberg, Gauteng
+6. Branding: Red `#C00000`, Navy `#001F4D`, White `#FFFFFF`
+
+## Current Status: Stage 3.1 ✅
+- [x] Dockerized Backend + DB + Frontend
+- [x] PostgreSQL database with SQLAlchemy models
+- [x] Seeded 36 classes: Grade 1-12 x Class A-C, capacity 15 each
+- [x] API: `/grades` endpoint showing availability `spots_left` + `FULL/AVAILABLE`
+- [x] CORS enabled for frontend-backend communication
+- [ ] Application Form with file upload
+- [ ] 10km Radius Map Picker
+- [ ] Parent Auth + Admin Dashboard
+- [ ] Final Branding + School Images
 
 ## Setup & Run
 
@@ -19,102 +40,57 @@ git clone <your-repo-url>
 cd Learner_Application
 DOCKER_BUILDKIT=0 sudo docker compose up --build -d
 
-### Testing Access to the App
+## Testing Access to the App
 
-- Frontend: http://192.168.100.63:5173 
+- Frontendhttp://192.168.100.63:5173
 
-- Backend API: http://192.168.100.63:8000/health
+- Backend API http://192.168.100.63:8000
 
-### Commands used 
+- API Docshttp://192.168.100.63:8000/docs
 
-- sudo docker ps                          # check containers
+- Health Checkhttp://192.168.100.63:8000/health
 
+- Grades Listhttp://192.168.100.63:8000/grades
 
-- sudo docker logs learner_backend -f     # backend logs
+## Useful Docker Commands
 
+sudo docker ps # check containers
 
-- sudo docker logs learner_frontend -f    # frontend logs
-
-
-- DOCKER_BUILDKIT=0 sudo docker compose down   # stop
-
-### Steps we took
-
-1. Created project structure with backend and frontend folders
-
-2. Built FastAPI backend with CORS enabled
-
-3. Built React + Vite frontend
-
-4. Fixed Dockerfile COPY syntax and docker-compose YAML spacing issues
-
-5. Containerized both services with docker-compose
-
-6. Tested endpoints
-
-### Push to GitHub/GitLab
-
-git remote add origin https://github.com/YOUR_USERNAME/Learner_Application.git
+sudo docker logs learner_backend -f # backend logs
 
 
-cat > README.md << 'EOF'
-# Learner_Application
-
-Full-stack learning app built with FastAPI + React + Docker
-
-## Tech Stack
-- **Backend**: FastAPI, Uvicorn, Python 3.11
-- **Frontend**: React 18, Vite 5
-- **Containerization**: Docker + Docker Compose
-
-## Setup & Run
-
-### Prerequisites
-- Docker
-- Docker Compose
-
-### 1. Clone and Start
-```bash
-git clone <your-repo-url>
-cd Learner_Application
-DOCKER_BUILDKIT=0 sudo docker compose up --build -d
-
-### Testing Access to the App
-
-- Frontend: http://192.168.100.63:5173 
-
-- Backend API: http://192.168.100.63:8000/health
-
-### Commands used 
-
-- sudo docker ps                          # check containers
+sudo docker logs learner_db -f # postgres logs
 
 
-- sudo docker logs learner_backend -f     # backend logs
+sudo docker logs learner_frontend -f # frontend logs
 
 
-- sudo docker logs learner_frontend -f    # frontend logs
+DOCKER_BUILDKIT=0 sudo docker compose down # stop all
 
 
-- DOCKER_BUILDKIT=0 sudo docker compose down   # stop
+DOCKER_BUILDKIT=0 sudo docker compose up --build -d # rebuild
 
-### Steps we took
+## Project Structure
 
-1. Created project structure with backend and frontend folders
+Learner_Application/
+├── backend/
+│ ├── main.py # FastAPI app + endpoints
+│ ├── models.py # DB tables: GradeClass, Parent, Application, Document
+│ ├── database.py # DB connection
+│ ├── seed.py # Seeds 36 classes
+│ ├── requirements.txt
+│ └── Dockerfile
+├── frontend/
+│ ├── src/
+│ └── Dockerfile
+├── docker-compose.yml
+└── README.md
 
-2. Built FastAPI backend with CORS enabled
+## Push to GitHub/GitLab
 
-3. Built React + Vite frontend
-
-4. Fixed Dockerfile COPY syntax and docker-compose YAML spacing issues
-
-5. Containerized both services with docker-compose
-
-6. Tested endpoints
-
-### Push to GitHub/GitLab
-
-git remote add origin https://github.com/YOUR_USERNAME/Learner_Application.git
-
+git init
+git branch -M main
+git add.
+git commit -m "Stage 3.1: Base API + DB + 36 classes with availability"
+git remote add origin https://github.com/YOUR_USERNAME/heidelberg-admissions.git
 git push -u origin main
-
