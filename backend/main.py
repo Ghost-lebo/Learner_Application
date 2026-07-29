@@ -1,66 +1,45 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, Form, File
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-import models
-from database import engine, get_db
-import time
+from fastapi.staticfiles import StaticFiles
+import shutil, os, json
 
-# Wait for DB to be ready
-for i in range(10):
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        print("DB is ready!")
-        break
-    except:
-        print(f"Waiting for DB... {i+1}/10")
-        time.sleep(2)
-
-models.Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Heidelberg Academy High Admissions")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "app": "Heidelberg Academy High Backend"}
+os.makedirs("uploads", exist_ok=True)
+DB_FILE = "applications.json"
+SPACES = {str(i): 30 for i in range(1,13)} # 30 spaces per grade to start
 
-# NEW: List all grades/classes with availability
-@app.get("/grades")
-def get_grades(db: Session = Depends(get_db)):
-    classes = db.query(models.GradeClass).order_by(models.GradeClass.grade_number, models.GradeClass.class_name).all()
-    result = []
-    for c in classes:
-        spots_left = c.capacity - c.filled_count
-        status = "AVAILABLE" if spots_left > 0 else "FULL"
-        result.append({
-            "id": c.id,
-            "grade": f"Grade {c.grade_number}{c.class_name}",
-            "grade_number": c.grade_number,
-            "class": c.class_name,
-            "capacity": c.capacity,
-            "filled": c.filled_count,
-            "spots_left": spots_left,
-            "status": status
-        })
-    return result
+@app.get("/spaces")
+def get_spaces():
+    return SPACES
 
-# OLD: Keep learners for testing
-@app.post("/learners/")
-def create_learner(name: str, email: str, db: Session = Depends(get_db)):
-    learner = models.Learner(name=name, email=email)
-    db.add(learner)
-    db.commit()
-    db.refresh(learner)
-    return learner
-
-@app.get("/learners/")
-def read_learners(db: Session = Depends(get_db)):
-    return db.query(models.Learner).all()
+@app.post("/apply")
+async def apply(
+    child_name: str = Form(...),
+    parent_name: str = Form(...),
+    grade: str = Form(...),
+    address: str = Form(...),
+    parent_id: UploadFile = File(...),
+    proof_address: UploadFile = File(...),
+    clinic_card: UploadFile = File(None),
+    medical_aid: UploadFile = File(None),
+):
+    # Save files
+    for f in [parent_id, proof_address, clinic_card, medical_aid]:
+        if f:
+            path = f"uploads/{f.filename}"
+            with open(path, "wb") as buffer: shutil.copyfileobj(f.file, buffer)
+    
+    # Update spaces
+    if int(grade) in range(1,13) and SPACES[grade] > 0:
+        SPACES[grade] -= 1
+    
+    return {"message": "Application submitted to Heidelberg Academy"}

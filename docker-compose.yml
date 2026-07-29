@@ -1,25 +1,15 @@
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: learner_db
-    environment:
-      POSTGRES_USER: learner
-      POSTGRES_PASSWORD: learnerpass
-      POSTGRES_DB: learnerdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   backend:
     build: ./backend
     container_name: learner_backend
     ports:
       - "8000:8000"
-    depends_on:
-      - db
+    volumes:
+      - ./backend:/app
+      - ./backend/uploads:/app/uploads
     environment:
-      DATABASE_URL: postgresql+psycopg2://learner:learnerpass@db:5432/learnerdb
+      - DATABASE_URL=sqlite:///./app.db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build: ./frontend
@@ -28,6 +18,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-
-volumes:
-  pgdata:
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npx vite --host 0.0.0.0 --port 5173
