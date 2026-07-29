@@ -1,9 +1,26 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: learner_db
+    environment:
+      POSTGRES_USER: learner
+      POSTGRES_PASSWORD: learnerpass
+      POSTGRES_DB: learnerdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   backend:
     build: ./backend
     container_name: learner_backend
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://learner:learnerpass@db:5432/learnerdb
+
   frontend:
     build: ./frontend
     container_name: learner_frontend
@@ -11,3 +28,6 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+
+volumes:
+  pgdata:
